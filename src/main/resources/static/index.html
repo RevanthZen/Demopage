@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>User Management</title>
+</head>
+<body>
+
+<h2>User Registration</h2>
+
+Name: <input type="text" id="name"><br><br>
+Email: <input type="email" id="email"><br><br>
+
+<button onclick="saveUser()">Save</button>
+<button onclick="clearUsers()">Clear All</button>
+<button onclick="loadUsers()">List All</button>
+
+<p id="msg"></p>
+
+<h3>User List</h3>
+
+<table border="1" id="userTable">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Name</th>
+            <th>Email</th>
+        </tr>
+    </thead>
+    <tbody>
+    </tbody>
+</table>
+
+<script>
+
+// Load users when page opens
+
+
+function loadUsers() {
+    fetch("/api/users")
+        .then(res => res.json())
+        .then(data => {
+            const tableBody = document.querySelector("#userTable tbody");
+            tableBody.innerHTML = "";
+
+            data.forEach(user => {
+                const row = `
+                    <tr>
+                        <td>${user.id}</td>
+                        <td>${user.name}</td>
+                        <td>${user.email}</td>
+                    </tr>
+                `;
+                tableBody.innerHTML += row;
+            });
+        });
+}
+
+function saveUser() {
+    const user = {
+        name: document.getElementById("name").value,
+        email: document.getElementById("email").value
+    };
+
+    fetch("/api/users", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(user)
+    })
+    .then(() => {
+        document.getElementById("msg").innerText = "User saved!";
+        loadUsers();   // refresh table
+    });
+}
+
+function clearUsers() {
+    fetch("/api/users/clear", {
+        method: "DELETE"
+    })
+    .then(res => res.text())
+    .then(msg => {
+        document.getElementById("msg").innerText = msg;
+        loadUsers();   // refresh table
+    });
+}
+
+</script>
+
+</body>
+</html>
